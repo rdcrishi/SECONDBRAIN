@@ -525,3 +525,4 @@ if __name__ == '__main__':
     print(f"\n🚀 Starting NexusMind RAG Backend on port {port}...")
     print(f"📊 Visit http://localhost:{port}/api/health to check status\n")
     app.run(debug=True, port=port, host='0.0.0.0')
+
