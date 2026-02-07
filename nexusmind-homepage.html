@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusMind - Your Entire Semester, Synthesized</title>
+    <meta name="description"
+        content="Connect handwritten notes, PDFs, and lectures into one searchable intelligence. AI-driven Second Brain for students.">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Framer Motion -->
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            900: '#0a1628',
+                            800: '#0f1f38',
+                            700: '#152840',
+                        },
+                        charcoal: {
+                            900: '#1a1a2e',
+                            800: '#252541',
+                            700: '#2d2d44',
+                        },
+                        violet: {
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        },
+                        'electric-violet': '#a855f7',
+                    },
+                    fontFamily: {
+                        display: ['Inter', 'system-ui', 'sans-serif'],
+                        body: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a1a2e 50%, #152840 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphic Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(168, 85, 247, 0.2);
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #a855f7;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: #7c3aed;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: #8b5cf6;
+            bottom: 10%;
+            left: 50%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -30px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+        }
+
+        /* CTA Button */
+        .cta-button {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.5);
+        }
+
+        /* Knowledge Graph Canvas */
+        #knowledge-graph {
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Fade-in animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            transform: translateY(20px);
+        }
+
+        /* Stagger animation delays */
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-400 {
+            animation-delay: 0.4s;
+        }
+
+        .delay-500 {
+            animation-delay: 0.5s;
+        }
+
+        .delay-600 {
+            animation-delay: 0.6s;
+        }
+
+        /* Query Interface */
+        .query-interface {
+            background: rgba(10, 22, 40, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-card border-0 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="brain" class="text-electric-violet" style="width: 32px; height: 32px;"></i>
+                    <span class="text-2xl font-bold gradient-text">NexusMind</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-300 hover:text-electric-violet transition">Features</a>
+                    <a href="#how-it-works" class="text-gray-300 hover:text-electric-violet transition">How It Works</a>
+                    <a href="#pricing" class="text-gray-300 hover:text-electric-violet transition">Pricing</a>
+                </div>
+                <a href="nexusmind-login.html"
+                    class="px-6 py-2 bg-electric-violet rounded-full hover:bg-violet-600 transition font-medium inline-block">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center pt-20 px-6">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div class="fade-in delay-100">
+                <h1 class="text-6xl md:text-7xl font-black mb-6 leading-tight">
+                    Your Entire Semester, <span class="gradient-text">Synthesized.</span>
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                    Connect handwritten notes, PDFs, and lectures into one searchable intelligence.
+                    NexusMind transforms your fragmented study materials into a unified knowledge base
+                    powered by AI.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="nexusmind-login.html"
+                        class="cta-button px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center space-x-2">
+                        <span>Start Ingesting</span>
+                        <i data-lucide="arrow-right" style="width: 20px; height: 20px;"></i>
+                    </a>
+                    <button
+                        class="px-8 py-4 rounded-full font-bold text-lg border-2 border-electric-violet hover:bg-electric-violet/10 transition flex items-center justify-center space-x-2">
+                        <i data-lucide="play-circle" style="width: 20px; height: 20px;"></i>
+                        <span>Watch Demo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3D Knowledge Graph Placeholder -->
+            <div class="fade-in delay-300">
+                <div class="glass-card p-8">
+                    <canvas id="knowledge-graph"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem/Solution Bento Grid -->
+    <section id="features" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-5xl font-black text-center mb-4 gradient-text fade-in">The Problem. The Solution.</h2>
+            <p class="text-center text-gray-400 mb-12 fade-in delay-100">Traditional note-taking is broken. NexusMind
+                fixes it.</p>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Card 1: Fragmented Notes -->
+                <div class="glass-card p-8 fade-in delay-200">
+                    <div class="flex items-start space-x-4">
+                        <div class="p-3 bg-red-500/20 rounded-lg">
+                            <i data-lucide="file-x" class="text-red-400" style="width: 32px; height: 32px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Fragmented Notes</h3>
+                            <p class="text-gray-400 mb-4">Your notes are scattered across notebooks, apps, and devices.
+                                Finding information feels like searching for a needle in a haystack.</p>
+                            <div class="p-4 bg-electric-violet/10 rounded-lg border border-electric-violet/30">
+                                <p class="text-sm font-semibold text-electric-violet flex items-center">
+                                    <i data-lucide="check-circle" class="mr-2" style="width: 16px; height: 16px;"></i>
+                                    NexusMind unifies everything in one intelligent system
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Lost Lecture Context -->
+                <div class="glass-card p-8 fade-in delay-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="p-3 bg-orange-500/20 rounded-lg">
+                            <i data-lucide="ear-off" class="text-orange-400" style="width: 32px; height: 32px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Lost Lecture Context</h3>
+                            <p class="text-gray-400 mb-4">Audio recordings sit unused. You can't remember what was said
+                                at minute 23 without listening to the entire thing.</p>
+                            <div class="p-4 bg-electric-violet/10 rounded-lg border border-electric-violet/30">
+                                <p class="text-sm font-semibold text-electric-violet flex items-center">
+                                    <i data-lucide="check-circle" class="mr-2" style="width: 16px; height: 16px;"></i>
+                                    AI transcribes and timestamps every lecture automatically
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Format Silos -->
+                <div class="glass-card p-8 fade-in delay-400">
+                    <div class="flex items-start space-x-4">
+                        <div class="p-3 bg-yellow-500/20 rounded-lg">
+                            <i data-lucide="layers" class="text-yellow-400" style="width: 32px; height: 32px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Format Silos</h3>
+                            <p class="text-gray-400 mb-4">PDFs, images, handwriting, audio - each format trapped in its
+                                own world with no way to connect the dots.</p>
+                            <div class="p-4 bg-electric-violet/10 rounded-lg border border-electric-violet/30">
+                                <p class="text-sm font-semibold text-electric-violet flex items-center">
+                                    <i data-lucide="check-circle" class="mr-2" style="width: 16px; height: 16px;"></i>
+                                    Universal ingestion supports 50+ file formats
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Search Frustration -->
+                <div class="glass-card p-8 fade-in delay-500">
+                    <div class="flex items-start space-x-4">
+                        <div class="p-3 bg-purple-500/20 rounded-lg">
+                            <i data-lucide="search-x" class="text-purple-400" style="width: 32px; height: 32px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Search Frustration</h3>
+                            <p class="text-gray-400 mb-4">You know you learned it somewhere, but where? Ctrl+F doesn't
+                                work on handwriting or audio.</p>
+                            <div class="p-4 bg-electric-violet/10 rounded-lg border border-electric-violet/30">
+                                <p class="text-sm font-semibold text-electric-violet flex items-center">
+                                    <i data-lucide="check-circle" class="mr-2" style="width: 16px; height: 16px;"></i>
+                                    Semantic search across ALL your materials instantly
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Highlight: Ingestion Engine -->
+    <section id="how-it-works" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="glass-card p-12">
+                <h2 class="text-5xl font-black text-center mb-4 gradient-text">The Ingestion Engine</h2>
+                <p class="text-center text-gray-400 mb-12">Universal format support. Intelligent processing. Zero manual
+                    work.</p>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <!-- Left Side: Icons -->
+                    <div class="space-y-6">
+                        <div
+                            class="flex items-center space-x-4 p-6 bg-gradient-to-r from-electric-violet/10 to-transparent rounded-xl border border-electric-violet/20 hover:border-electric-violet/50 transition">
+                            <div class="p-4 bg-red-500/20 rounded-lg">
+                                <i data-lucide="file-text" class="text-red-400" style="width: 40px; height: 40px;"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold">PDF Documents</h3>
+                                <p class="text-gray-400">Textbooks, papers, and handouts</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex items-center space-x-4 p-6 bg-gradient-to-r from-electric-violet/10 to-transparent rounded-xl border border-electric-violet/20 hover:border-electric-violet/50 transition">
+                            <div class="p-4 bg-blue-500/20 rounded-lg">
+                                <i data-lucide="image" class="text-blue-400" style="width: 40px; height: 40px;"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold">Handwritten Notes (JPG/PNG)</h3>
+                                <p class="text-gray-400">OCR-powered text extraction</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex items-center space-x-4 p-6 bg-gradient-to-r from-electric-violet/10 to-transparent rounded-xl border border-electric-violet/20 hover:border-electric-violet/50 transition">
+                            <div class="p-4 bg-green-500/20 rounded-lg">
+                                <i data-lucide="mic" class="text-green-400" style="width: 40px; height: 40px;"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold">Audio Lectures (MP3/WAV)</h3>
+                                <p class="text-gray-400">AI transcription with timestamps</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Description -->
+                    <div>
+                        <div
+                            class="p-8 bg-gradient-to-br from-navy-900 to-charcoal-900 rounded-2xl border border-electric-violet/30">
+                            <h3 class="text-3xl font-bold mb-4">Universal Ingestion</h3>
+                            <p class="text-gray-300 mb-6 leading-relaxed">
+                                Our cutting-edge ingestion engine automatically processes any format you throw at it.
+                                Advanced OCR extracts text from your handwritten notes with 99% accuracy.
+                                State-of-the-art speech recognition transcribes lectures in real-time.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="zap" class="text-yellow-400 mt-1"
+                                        style="width: 20px; height: 20px;"></i>
+                                    <span class="text-gray-300">Process files in seconds, not hours</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="shield-check" class="text-green-400 mt-1"
+                                        style="width: 20px; height: 20px;"></i>
+                                    <span class="text-gray-300">100% private - your data never leaves your device</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="sparkles" class="text-purple-400 mt-1"
+                                        style="width: 20px; height: 20px;"></i>
+                                    <span class="text-gray-300">AI automatically tags and categorizes content</span>
+                                </li>
+                            </ul>
+                            <button
+                                class="mt-8 w-full px-6 py-3 bg-electric-violet rounded-lg hover:bg-violet-600 transition font-semibold flex items-center justify-center space-x-2">
+                                <span>Try Ingestion Engine</span>
+                                <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Query Interface Mockup -->
+    <section class="py-20 px-6">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-black text-center mb-4 gradient-text">Ask Anything. Get Everything.</h2>
+            <p class="text-center text-gray-400 mb-12">Your personal AI research assistant trained on YOUR materials</p>
+
+            <div class="query-interface glass-card p-8 rounded-3xl">
+                <!-- Search Bar -->
+                <div class="relative mb-8">
+                    <input type="text" placeholder="How does the Krebs cycle relate to my lab notes from Tuesday?"
+                        class="w-full px-6 py-5 bg-navy-900 rounded-2xl border-2 border-electric-violet/30 focus:border-electric-violet outline-none text-lg text-white placeholder-gray-500"
+                        value="How does the Krebs cycle relate to my lab notes from Tuesday?">
+                    <button
+                        class="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-electric-violet rounded-xl hover:bg-violet-600 transition">
+                        <i data-lucide="search" style="width: 24px; height: 24px;"></i>
+                    </button>
+                </div>
+
+                <!-- Mock Response -->
+                <div
+                    class="p-6 bg-gradient-to-br from-navy-800 to-charcoal-800 rounded-2xl border border-electric-violet/20">
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        The Krebs cycle (citric acid cycle) is a crucial metabolic pathway that occurs in the
+                        mitochondrial matrix.
+                        Based on your materials, this directly relates to the cellular respiration experiment you
+                        conducted on Tuesday,
+                        where you measured ATP production in yeast cells.
+                    </p>
+
+                    <div class="space-y-3">
+                        <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Sources:</h4>
+
+                        <div
+                            class="flex items-center space-x-3 p-4 bg-navy-900/50 rounded-xl border border-electric-violet/10 hover:border-electric-violet/30 transition cursor-pointer">
+                            <i data-lucide="book-open" class="text-red-400" style="width: 24px; height: 24px;"></i>
+                            <div class="flex-1">
+                                <p class="font-semibold">Biology Textbook</p>
+                                <p class="text-sm text-gray-400">Chapter 9, Page 102</p>
+                            </div>
+                            <i data-lucide="external-link" class="text-gray-500" style="width: 18px; height: 18px;"></i>
+                        </div>
+
+                        <div
+                            class="flex items-center space-x-3 p-4 bg-navy-900/50 rounded-xl border border-electric-violet/10 hover:border-electric-violet/30 transition cursor-pointer">
+                            <i data-lucide="mic" class="text-green-400" style="width: 24px; height: 24px;"></i>
+                            <div class="flex-1">
+                                <p class="font-semibold">Lecture Audio - Tuesday</p>
+                                <p class="text-sm text-gray-400">Timestamp: 12:45</p>
+                            </div>
+                            <i data-lucide="external-link" class="text-gray-500" style="width: 18px; height: 18px;"></i>
+                        </div>
+
+                        <div
+                            class="flex items-center space-x-3 p-4 bg-navy-900/50 rounded-xl border border-electric-violet/10 hover:border-electric-violet/30 transition cursor-pointer">
+                            <i data-lucide="file-edit" class="text-blue-400" style="width: 24px; height: 24px;"></i>
+                            <div class="flex-1">
+                                <p class="font-semibold">Lab Notes - Tuesday</p>
+                                <p class="text-sm text-gray-400">Handwritten, Page 3</p>
+                            </div>
+                            <i data-lucide="external-link" class="text-gray-500" style="width: 18px; height: 18px;"></i>
+                        </div>
+                    </div>
+
+                    <button
+                        class="mt-6 w-full px-6 py-3 border-2 border-electric-violet/30 rounded-xl hover:bg-electric-violet/10 transition font-semibold flex items-center justify-center space-x-2">
+                        <span>Ask Follow-up Question</span>
+                        <i data-lucide="message-circle" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof / Stats Bar -->
+    <section class="stats-bar py-8 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-black gradient-text mb-2">99%</div>
+                    <p class="text-gray-400">Transcription Accuracy</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-black gradient-text mb-2">50+</div>
+                    <p class="text-gray-400">File Formats Supported</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-black gradient-text mb-2">10K+</div>
+                    <p class="text-gray-400">Active Students</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-black gradient-text mb-2">
+                        < 2s</div>
+                            <p class="text-gray-400">Average Query Time</p>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="glass-card p-12 rounded-3xl">
+                <h2 class="text-5xl font-black mb-6">Ready to Transform Your Study Workflow?</h2>
+                <p class="text-xl text-gray-300 mb-8">
+                    Join thousands of students who've upgraded to an AI-powered Second Brain
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="nexusmind-login.html"
+                        class="cta-button px-10 py-5 rounded-full font-bold text-xl flex items-center justify-center space-x-2">
+                        <span>Get Started Free</span>
+                        <i data-lucide="arrow-right" style="width: 24px; height: 24px;"></i>
+                    </a>
+                    <button
+                        class="px-10 py-5 rounded-full font-bold text-xl border-2 border-electric-violet hover:bg-electric-violet/10 transition flex items-center justify-center space-x-2">
+                        <i data-lucide="calendar" style="width: 24px; height: 24px;"></i>
+                        <span>Schedule Demo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i data-lucide="brain" class="text-electric-violet" style="width: 28px; height: 28px;"></i>
+                        <span class="text-xl font-bold gradient-text">NexusMind</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Your AI-powered Second Brain for academic excellence</p>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-4">Product</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-electric-violet transition">Features</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Pricing</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Integrations</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-4">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-electric-violet transition">About</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Blog</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Careers</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-electric-violet transition">Privacy</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Terms</a></li>
+                        <li><a href="#" class="hover:text-electric-violet transition">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2026 NexusMind. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <!-- Knowledge Graph Animation -->
+    <script>
+        const canvas = document.getElementById('knowledge-graph');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        // Node class
+        class Node {
+            constructor(x, y, radius, label, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = radius;
+                this.label = label;
+                this.color = color;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < this.radius || this.x > canvas.width - this.radius) this.vx *= -1;
+                if (this.y < this.radius || this.y > canvas.height - this.radius) this.vy *= -1;
+            }
+
+            draw() {
+                // Glow effect
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = this.color;
+
+                // Node
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+
+                // Label
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '12px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(this.label, this.x, this.y + this.radius + 15);
+            }
+        }
+
+        // Create nodes
+        const nodes = [
+            new Node(150, 100, 20, 'Biology', '#a855f7'),
+            new Node(400, 150, 25, 'Krebs Cycle', '#8b5cf6'),
+            new Node(300, 280, 18, 'Lab Notes', '#7c3aed'),
+            new Node(500, 250, 22, 'Lecture', '#6d28d9'),
+            new Node(200, 320, 16, 'Textbook', '#a855f7'),
+        ];
+
+        // Animation loop
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 22, 40, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const dx = nodes[j].x - nodes[i].x;
+                    const dy = nodes[j].y - nodes[i].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 200) {
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(nodes[j].x, nodes[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Update and draw nodes
+            nodes.forEach(node => {
+                node.update();
+                node.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>

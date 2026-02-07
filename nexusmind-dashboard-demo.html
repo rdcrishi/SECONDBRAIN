@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NexusMind (Demo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a1a2e 50%, #152840 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-3">
+                <i data-lucide="brain" class="text-purple-500" style="width: 36px; height: 36px;"></i>
+                <h1 class="text-3xl font-bold gradient-text">NexusMind</h1>
+                <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 text-xs font-semibold rounded-full">DEMO
+                    MODE</span>
+            </div>
+            <button id="logoutBtn" class="px-6 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition">
+                Logout
+            </button>
+        </div>
+
+        <div class="glass-card p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-4">✨ Welcome to NexusMind Demo!</h2>
+            <div class="space-y-2">
+                <p class="text-gray-300"><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                <p class="text-gray-300"><strong>User ID:</strong> <span id="userId">Loading...</span></p>
+                <p class="text-gray-300"><strong>Status:</strong> <span class="text-green-400">● Demo Active</span></p>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="glass-card p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="p-3 bg-purple-500/20 rounded-lg">
+                        <i data-lucide="file-text" class="text-purple-400" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Documents</h3>
+                </div>
+                <p class="text-3xl font-black gradient-text mb-2">0</p>
+                <p class="text-gray-400 text-sm">Ready to upload</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="p-3 bg-blue-500/20 rounded-lg">
+                        <i data-lucide="message-circle" class="text-blue-400" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Queries</h3>
+                </div>
+                <p class="text-3xl font-black gradient-text mb-2">0</p>
+                <p class="text-gray-400 text-sm">Start asking questions</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="p-3 bg-green-500/20 rounded-lg">
+                        <i data-lucide="zap" class="text-green-400" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Insights</h3>
+                </div>
+                <p class="text-3xl font-black gradient-text mb-2">0</p>
+                <p class="text-gray-400 text-sm">AI-generated insights</p>
+            </div>
+        </div>
+
+        <div class="glass-card p-8 mt-8">
+            <h3 class="text-2xl font-bold mb-6">🚀 Next Steps</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div
+                    class="p-6 bg-gradient-to-r from-purple-500/20 to-transparent rounded-xl border border-purple-500/30">
+                    <h4 class="font-bold text-lg mb-2">📁 Upload Your Files</h4>
+                    <p class="text-gray-400 text-sm mb-3">Add PDFs, handwritten notes, or lecture recordings</p>
+                    <button
+                        class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-sm font-semibold transition">
+                        Coming Soon
+                    </button>
+                </div>
+
+                <div class="p-6 bg-gradient-to-r from-blue-500/20 to-transparent rounded-xl border border-blue-500/30">
+                    <h4 class="font-bold text-lg mb-2">💬 AI Chat Interface</h4>
+                    <p class="text-gray-400 text-sm mb-3">Query your Second Brain with AI assistance</p>
+                    <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-sm font-semibold transition">
+                        Coming Soon
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <p class="text-green-300 text-sm">✅ <strong>Demo mode is working!</strong> This proves your UI and
+                    routing are perfect. When Firebase is fixed, everything will work the same way.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Check if user is logged in
+        const user = JSON.parse(localStorage.getItem('demoUser'));
+        if (!user) {
+            window.location.href = 'nexusmind-login-demo.html';
+        } else {
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userId').textContent = user.uid;
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('demoUser');
+            window.location.href = 'nexusmind-login-demo.html';
+        });
+    </script>
+</body>
+
+</html>
