@@ -229,9 +229,10 @@
                     </div>
                     <div>
                         <h4 class="text-xl font-bold mb-2">Drop files here or click to browse</h4>
-                        <p class="text-gray-400">Support for PDFs and Audio files (MP3, WAV, M4A, OGG, FLAC, AAC)</p>
+                        <p class="text-gray-400">Support for PDFs, Audio, and Images (JPG, PNG, BMP)</p>
                     </div>
-                    <input type="file" id="fileInput" accept=".pdf,.mp3,.wav,.m4a,.ogg,.flac,.aac" multiple
+                    <input type="file" id="fileInput"
+                        accept=".pdf,.mp3,.wav,.m4a,.ogg,.flac,.aac,.jpg,.jpeg,.png,.bmp,.tiff,.webp" multiple
                         class="hidden">
                 </div>
             </div>
@@ -357,7 +358,7 @@
             if (['pdf'].includes(ext)) return 'pdf';
             if (['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac'].includes(ext)) return 'audio';
             if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) return 'video';
-            if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].includes(ext)) return 'image';
             return 'other';
         }
 
@@ -480,9 +481,12 @@
                 const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav') ||
                     fileName.endsWith('.m4a') || fileName.endsWith('.ogg') ||
                     fileName.endsWith('.flac') || fileName.endsWith('.aac');
+                const isImage = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ||
+                    fileName.endsWith('.png') || fileName.endsWith('.bmp') ||
+                    fileName.endsWith('.tiff') || fileName.endsWith('.webp');
 
-                if (!isPDF && !isAudio) {
-                    alert('Only PDF and audio files (MP3, WAV, M4A, OGG, FLAC, AAC) are supported!');
+                if (!isPDF && !isAudio && !isImage) {
+                    alert('Unsupported file type! Please upload PDF, Audio, or Image files.');
                     continue;
                 }
 
@@ -491,13 +495,16 @@
                 processingMsg.id = 'processing-msg';
                 processingMsg.className = 'glass-card p-4 flex items-center space-x-3 bg-blue-500/10 border border-blue-500/30';
 
-                const actionText = isAudio ? 'Transcribing audio' : 'Processing PDF';
+                let actionText = 'Processing PDF';
+                if (isAudio) actionText = 'Transcribing audio';
+                if (isImage) actionText = 'Extracting text from image';
 
                 processingMsg.innerHTML = `
                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-electric-violet"></div>
                     <div>
                         <span class="block">${actionText}: ${file.name}...</span>
                         ${isAudio ? '<span class="text-xs text-blue-400" id="transcription-progress">Preparing... (0%)</span>' : ''}
+                        ${isImage ? '<span class="text-xs text-blue-400">Running OCR...</span>' : ''}
                     </div>
                 `;
                 filesList.insertBefore(processingMsg, filesList.firstChild);

@@ -13,6 +13,7 @@ from openai import OpenAI
 from utils.pdf_processor import extract_text_from_pdf
 from utils.chunker import chunk_with_metadata
 from utils.audio_processor import transcribe_audio
+from utils.ocr_processor import extract_text_from_image
 
 # Add FFmpeg to PATH for transcription support
 FFMPEG_PATH = r"C:\Users\Himank Suiwala\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.0.1-full_build\bin"
@@ -172,9 +173,10 @@ def upload_file():
         file_extension = file.filename.split('.')[-1].lower()
         is_pdf = file_extension == 'pdf'
         is_audio = file_extension in ['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac']
+        is_image = file_extension in ['jpg', 'jpeg', 'png', 'bmp', 'tiff', 'webp']
         
-        if not (is_pdf or is_audio):
-            return jsonify({'error': 'Only PDF and audio files (MP3, WAV, M4A, OGG, FLAC, AAC) are supported'}), 400
+        if not (is_pdf or is_audio or is_image):
+            return jsonify({'error': 'Unsupported file type. Allowed: PDF, Audio, Images'}), 400
         
         # Generate unique file ID
         file_id = str(uuid.uuid4())
@@ -208,6 +210,25 @@ def upload_file():
             file_type = 'pdf'
             num_pages = pdf_data['num_pages']
             
+        elif is_image:
+            print(f"🖼️  Processing Image: {file.filename}")
+            
+            # Extract text from image
+            ocr_data = extract_text_from_image(file_path)
+            
+            if not ocr_data['success']:
+                return jsonify({'error': f"Failed to process image: {ocr_data.get('error')}"}), 500
+                
+            print(f"✅ OCR Extracted {len(ocr_data['text'])} characters (Conf: {ocr_data['confidence']:.2f})")
+            
+            # Create chunks (treat as 1 page)
+            pages = [{'page': 1, 'text': ocr_data['text']}]
+            chunks = chunk_with_metadata(pages, chunk_size=1000, overlap=100)
+            print(f"✂️  Created {len(chunks)} chunks")
+            
+            file_type = 'image'
+            num_pages = 1
+
         else:  # Audio file
             print(f"🎵 Processing Audio: {file.filename}")
             
@@ -263,7 +284,9 @@ def upload_file():
             'file_type': file_type,
             'num_pages': num_pages,
             'chunks': len(chunks),
-            'message': f'{"PDF" if is_pdf else "Audio"} file processed successfully!'
+            'num_pages': num_pages,
+            'chunks': len(chunks),
+            'message': f'{file_type.upper()} file processed successfully!'
         })
     
     except Exception as e:

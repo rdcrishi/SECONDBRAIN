@@ -32,6 +32,18 @@ def extract_text_from_pdf(pdf_path: str) -> Dict[str, any]:
             # Combine all text
             full_text = ' '.join([p['text'] for p in pages_text])
             
+            # Check if text is too short (likely scanned PDF)
+            if len(full_text.strip()) < 50:
+                print("⚠️  PDF text content too short. Attempting OCR...")
+                from utils.ocr_processor import extract_text_from_scanned_pdf
+                ocr_result = extract_text_from_scanned_pdf(pdf_path)
+                
+                if ocr_result['success']:
+                    return ocr_result
+                else:
+                    print(f"❌ OCR fallback failed: {ocr_result.get('error')}")
+                    # Return original empty/short result if OCR fails
+            
             return {
                 'success': True,
                 'text': full_text,
