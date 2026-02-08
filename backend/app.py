@@ -116,6 +116,42 @@ def search_similar_chunks(query_embedding, top_k=5):
     
     return results
 
+
+def search_chunks_by_file(file_id, limit=10):
+    """Retrieve chunks belonging to a specific file"""
+    results = []
+    
+    # Simple linear scan (sufficient for in-memory)
+    for i, meta in enumerate(vector_store['metadata']):
+        if meta.get('file_id') == file_id:
+            results.append({
+                'text': vector_store['texts'][i],
+                'metadata': meta,
+                'index': i
+            })
+            if len(results) >= limit:
+                break
+                
+    return results
+
+def get_random_chunks_from_user(user_id, limit=15):
+    """Retrieve random chunks from a user's library for cross-doc analysis"""
+    import random
+    user_indices = [i for i, m in enumerate(vector_store['metadata']) if m.get('user_id') == user_id]
+    
+    if not user_indices:
+        return []
+        
+    selected_indices = random.sample(user_indices, min(len(user_indices), limit))
+    
+    results = []
+    for idx in selected_indices:
+        results.append({
+            'text': vector_store['texts'][idx],
+            'metadata': vector_store['metadata'][idx]
+        })
+    return results
+
 # ===== STATIC FILE ROUTES =====
 
 @app.route('/')
@@ -349,17 +385,24 @@ def query_knowledge_base():
         context = "\n\n".join(context_parts)
         
         # Generate answer with Ollama
-        prompt = f"""You are a helpful AI assistant for a student's Second Brain knowledge base.
+        prompt = f"""You are a friendly and helpful AI study assistant for a student's Second Brain.
 
-Answer the following question based ONLY on the provided context from the student's uploaded documents.
-If the answer cannot be found in the context, say so clearly.
+Your goal is to answer the student's question based ONLY on the provided context.
 
 Context from documents:
 {context}
 
 Question: {query}
 
-Provide a clear, helpful answer that matches the tone of the student's question—whether it's professional, layman, or casual—while remaining grounded in the provided context. Cite which sources you used."""
+Guidelines for your response:
+1.  **Be Friendly & Encouraging**: Use a helpful and positive tone.
+2.  **Use Formatting**:
+    *   Use **bold** for key concepts or important terms.
+    *   Use **bullet points** to organize information and make it easy to read.
+3.  **Stay Grounded**: Answer only using the context provided above.
+4.  **Cite Sources**: Mention which source documents helped you answer.
+
+If the answer isn't in the documents, strictly say: "I couldn't find that information in your uploaded files." without making things up."""
 
         answer = generate_chat_response(prompt)
         
@@ -437,17 +480,24 @@ def query_knowledge_base_stream():
         context = "\n\n".join(context_parts)
         
         # Generate answer with Ollama - STREAMING
-        prompt = f"""You are a helpful AI assistant for a student's Second Brain knowledge base.
+        prompt = f"""You are a friendly and helpful AI study assistant for a student's Second Brain.
 
-Answer the following question based ONLY on the provided context from the student's uploaded documents.
-If the answer cannot be found in the context, say so clearly.
+Your goal is to answer the student's question based ONLY on the provided context.
 
 Context from documents:
 {context}
 
 Question: {query}
 
-Provide a clear, helpful answer that matches the tone of the student's question—whether it's professional, layman, or casual—while remaining grounded in the provided context. Cite which sources you used."""
+Guidelines for your response:
+1.  **Be Friendly & Encouraging**: Use a helpful and positive tone.
+2.  **Use Formatting**:
+    *   Use **bold** for key concepts or important terms.
+    *   Use **bullet points** to organize information and make it easy to read.
+3.  **Stay Grounded**: Answer only using the context provided above.
+4.  **Cite Sources**: Mention which source documents helped you answer.
+
+If the answer isn't in the documents, strictly say: "I couldn't find that information in your uploaded files." without making things up."""
 
         def generate_stream():
             try:
@@ -542,6 +592,180 @@ def delete_file(file_id):
     except Exception as e:
         print(f"❌ Delete error: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/generate-insights', methods=['POST'])
+def generate_insights():
+    """Generate AI insights: Summary, Quiz, or Connections"""
+    try:
+        data = request.get_json()
+        insight_type = data.get('type') # 'summary', 'quiz', 'connect'
+        user_id = data.get('userId')
+        file_id = data.get('fileId') # Optional for 'connect'
+        
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+
+        context = ""
+        prompt = ""
+        
+        # 1. SUMMARY MODE
+        if insight_type == 'summary':
+            if not file_id:
+                return jsonify({'error': 'File ID required for summary'}), 400
+                
+            # Get first 10 chunks (usually introduction/abstract) and some middle ones?
+            # For simplicity, let's take the first 15 chunks which covers a lot of ground
+            chunks = search_chunks_by_file(file_id, limit=15)
+            
+            if not chunks:
+                return jsonify({'error': 'File not found or empty'}), 404
+                
+            context = "\n\n".join([f"{c['text']}" for c in chunks])
+            
+            prompt = f"""Analyze the following document content and provide a structured summary.
+
+Document Content:
+{context[:12000]} 
+
+Output Format (Markdown):
+# Executive Summary
+[2-3 sentences]
+
+## Key Concepts
+*   **Concept 1**: Definition
+*   **Concept 2**: Definition
+*   **Concept 3**: Definition
+
+## Actionable Takeaways
+1.  [Takeaway 1]
+2.  [Takeaway 2]
+3.  [Takeaway 3]
+
+Ensure the tone is professional yet easy to understand."""
+
+        # 2. QUIZ MODE
+        elif insight_type == 'quiz':
+            if not file_id:
+                return jsonify({'error': 'File ID required for quiz'}), 400
+                
+            chunks = search_chunks_by_file(file_id, limit=20)
+            if not chunks:
+                return jsonify({'error': 'File not found'}), 404
+                
+            # Randomize chunks to get different questions each time?
+            import random
+            random.shuffle(chunks)
+            context = "\n\n".join([c['text'] for c in chunks[:8]])
+            
+            prompt = f"""Based on the text below, generate 5 multiple-choice questions to test understanding.
+            
+Text:
+{context[:10000]}
+
+Return STRICTLY valid JSON format. Do not use Markdown codes like ```json.
+Structure:
+[
+  {{
+    "question": "Question text?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answer": "Option B" 
+  }}
+]
+"""
+
+        # 3. CROSS-CONNECT MODE
+        elif insight_type == 'connect':
+            chunks = get_random_chunks_from_user(user_id, limit=20)
+            
+            if not chunks:
+                 return jsonify({'error': 'Not enough documents to find connections'}), 400
+                 
+            context = "\n\n".join([f"[{c['metadata']['file_name']}]: {c['text']}" for c in chunks])
+            
+            prompt = f"""Analyze these snippets from different documents in the user's library.
+            
+Snippets:
+{context[:15000]}
+
+Goal: Find interesting connections, contradictions, or common themes between these different sources.
+
+Output Format:
+## 🕸️ Knowledge Connections
+
+### Shared Themes
+[Identify 2-3 common themes]
+
+### Interesting Links
+*   **[File A]** and **[File B]** both discuss [Topic], but from different angles...
+*   [Observation about how concepts relate]
+
+If no strong connections are found, summarize the diverse topics covered in the library."""
+
+        # 4. FLOWCHART MODE
+        elif insight_type == 'flowchart':
+            if not file_id:
+                return jsonify({'error': 'File ID required for flowchart'}), 400
+            
+            # Optimization: Reduce context to 8 key chunks to speed up generation
+            chunks = search_chunks_by_file(file_id, limit=8)
+            if not chunks:
+                  return jsonify({'error': 'File not found'}), 404
+            
+            context = "\n\n".join([c['text'] for c in chunks])
+            
+            prompt = f"""Create a simple Mermaid.js flowchart (`graph TD`) for this content.
+            
+Content:
+{context[:8000]}
+
+Rules:
+1. MAX 8-10 nodes. Keep it simple.
+2. Short node text (max 4 words).
+3. valid Mermaid syntax only.
+3. Edges should represent relationships (e.g., "causes", "includes", "leads to").
+4. Keep node text short (max 4-5 words) to ensure readability.
+5. Do NOT include markdown code blocks like ```mermaid. Just return the raw code.
+6. The graph must be valid Mermaid syntax.
+
+Example Output:
+graph TD
+    A[Start] --> B(Process)
+    B --> C{{Decision}}
+    C -->|Yes| D[Result 1]
+    C -->|No| E[Result 2]
+"""
+        else:
+            return jsonify({'error': 'Invalid insight type'}), 400
+
+        # Generate Response
+        print(f"🧠 Generating {insight_type} insight...")
+        response_text = generate_chat_response(prompt)
+        
+        if not response_text:
+            return jsonify({'error': 'AI generation failed'}), 500
+            
+        # Parse JSON for quiz
+        if insight_type == 'quiz':
+            import json
+            try:
+                # Clean up potential markdown formatting
+                cleaned_text = response_text.replace('```json', '').replace('```', '').strip()
+                quiz_data = json.loads(cleaned_text)
+                return jsonify({'success': True, 'type': 'quiz', 'data': quiz_data})
+            except:
+                print(f"❌ JSON Parse Error: {response_text}")
+                return jsonify({'success': False, 'error': 'Failed to parse quiz JSON', 'raw': response_text})
+        
+        # Clean Mermaid for flowchart
+        elif insight_type == 'flowchart':
+             cleaned_text = response_text.replace('```mermaid', '').replace('```', '').strip()
+             return jsonify({'success': True, 'type': 'flowchart', 'data': cleaned_text})
+
+        return jsonify({'success': True, 'type': insight_type, 'data': response_text})
+    except Exception as e:
+        print(f"❌ Insight error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     port = 5000

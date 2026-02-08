@@ -13,6 +13,14 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Marked.js for Markdown Rendering -->
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Mermaid.js for Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+
     <!-- Custom Tailwind Configuration -->
     <script>
         tailwind.config = {
@@ -75,10 +83,79 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        /* Animated Background from Login Page */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #a855f7;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: #7c3aed;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: #8b5cf6;
+            bottom: 10%;
+            left: 50%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -30px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <div class="container mx-auto px-6 py-8">
         <!-- Header -->
         <div class="flex justify-between items-center mb-8">
@@ -142,156 +219,246 @@
         <!-- Attendance Tracker -->
         <div class="glass-card p-8 mt-8">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold">Lecture Attendance</h3>
-                <i data-lucide="calendar-check" class="text-electric-violet" style="width: 24px; height: 24px;"></i>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Circular Chart -->
-                <div class="flex flex-col items-center justify-center">
-                    <div class="relative w-48 h-48">
-                        <!-- Background Circle -->
-                        <svg class="w-48 h-48 transform -rotate-90">
-                            <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.1)" stroke-width="12"
-                                fill="none" />
-                            <!-- Progress Circle -->
-                            <circle id="attendanceCircle" cx="96" cy="96" r="88" stroke="url(#gradient)"
-                                stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="552.92"
-                                stroke-dashoffset="138.23" class="transition-all duration-1000 ease-out" />
-                            <defs>
-                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <!-- Percentage Text -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span id="attendancePercent" class="text-5xl font-black gradient-text">75%</span>
-                            <span class="text-gray-400 text-sm mt-1">Attended</span>
-                        </div>
-                    </div>
+                <div>
+                    <h3 class="text-2xl font-bold flex items-center gap-2">
+                        Attendance Tracker
+                        <i data-lucide="calendar-check" class="text-electric-violet"></i>
+                    </h3>
+                    <p class="text-gray-400 text-sm mt-1">Manage your daily attendance goals</p>
                 </div>
-
-                <!-- Stats -->
-                <div class="flex flex-col justify-center space-y-4">
-                    <div
-                        class="flex items-center justify-between p-4 bg-green-500/10 rounded-xl border border-green-500/30">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 bg-green-500/20 rounded-lg">
-                                <i data-lucide="check-circle" class="text-green-400"
-                                    style="width: 20px; height: 20px;"></i>
-                            </div>
-                            <span class="text-gray-300 font-semibold">Attended</span>
-                        </div>
-                        <span id="attendedCount" class="text-2xl font-bold text-green-400">18</span>
-                    </div>
-
-                    <div
-                        class="flex items-center justify-between p-4 bg-red-500/10 rounded-xl border border-red-500/30">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 bg-red-500/20 rounded-lg">
-                                <i data-lucide="x-circle" class="text-red-400" style="width: 20px; height: 20px;"></i>
-                            </div>
-                            <span class="text-gray-300 font-semibold">Missed</span>
-                        </div>
-                        <span id="missedCount" class="text-2xl font-bold text-red-400">6</span>
-                    </div>
-
-                    <div
-                        class="flex items-center justify-between p-4 bg-blue-500/10 rounded-xl border border-blue-500/30">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 bg-blue-500/20 rounded-lg">
-                                <i data-lucide="hash" class="text-blue-400" style="width: 20px; height: 20px;"></i>
-                            </div>
-                            <span class="text-gray-300 font-semibold">Total Lectures</span>
-                        </div>
-                        <span id="totalCount" class="text-2xl font-bold text-blue-400">24</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- File Upload Section -->
-        <div class="glass-card p-8 mt-8">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold">Ingest Materials</h3>
-                <i data-lucide="folder-open" class="text-electric-violet" style="width: 24px; height: 24px;"></i>
-            </div>
-
-            <!-- Drag & Drop Upload Area -->
-            <div id="dropZone"
-                class="border-2 border-dashed border-electric-violet/30 rounded-2xl p-12 text-center hover:border-electric-violet/60 hover:bg-electric-violet/5 transition cursor-pointer mb-6">
-                <div class="flex flex-col items-center space-y-4">
-                    <div class="p-6 bg-electric-violet/20 rounded-full">
-                        <i data-lucide="upload-cloud" class="text-electric-violet"
-                            style="width: 48px; height: 48px;"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xl font-bold mb-2">Drop files here or click to browse</h4>
-                        <p class="text-gray-400">Support for PDFs, Audio, and Images (JPG, PNG, BMP)</p>
-                    </div>
-                    <input type="file" id="fileInput"
-                        accept=".pdf,.mp3,.wav,.m4a,.ogg,.flac,.aac,.jpg,.jpeg,.png,.bmp,.tiff,.webp" multiple
-                        class="hidden">
-                </div>
-            </div>
-
-            <!-- Upload Stats -->
-            <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="glass-card p-4 text-center">
-                    <i data-lucide="file-text" class="text-purple-400 mx-auto mb-2"
-                        style="width: 24px; height: 24px;"></i>
-                    <p id="pdfCount" class="text-2xl font-bold gradient-text">0</p>
-                    <p class="text-gray-400 text-sm">PDFs</p>
-                </div>
-                <div class="glass-card p-4 text-center">
-                    <i data-lucide="music" class="text-blue-400 mx-auto mb-2" style="width: 24px; height: 24px;"></i>
-                    <p id="audioCount" class="text-2xl font-bold gradient-text">0</p>
-                    <p class="text-gray-400 text-sm">Audio</p>
-                </div>
-                <div class="glass-card p-4 text-center">
-                    <i data-lucide="video" class="text-green-400 mx-auto mb-2" style="width: 24px; height: 24px;"></i>
-                    <p id="videoCount" class="text-2xl font-bold gradient-text">0</p>
-                    <p class="text-gray-400 text-sm">Videos</p>
-                </div>
-            </div>
-
-            <!-- Uploaded Files List -->
-            <div id="filesList" class="space-y-3">
-                <!-- Files will be added here dynamically -->
-            </div>
-
-            <div id="emptyState" class="text-center py-8 text-gray-500">
-                <i data-lucide="inbox" style="width: 48px; height: 48px;" class="mx-auto mb-3 opacity-50"></i>
-                <p>No files uploaded yet. Start by uploading your study materials!</p>
-            </div>
-        </div>
-
-        <!-- AI Query Section -->
-        <div class="glass-card p-8 mt-8">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold">Ask Your Second Brain</h3>
-                <i data-lucide="message-circle" class="text-electric-violet" style="width: 24px; height: 24px;"></i>
-            </div>
-
-            <!-- Chat History -->
-            <div id="chatHistory" class="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                <!-- Chat messages will appear here -->
-            </div>
-
-            <!-- Query Input -->
-            <div class="flex space-x-3">
-                <input type="text" id="queryInput" placeholder="Ask a question about your uploaded documents..."
-                    class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-electric-violet text-white"
-                    onkeypress="if(event.key==='Enter') askQuestion()" />
-                <button id="askBtn" onclick="askQuestion()"
-                    class="px-6 py-3 bg-electric-violet hover:bg-violet-600 rounded-xl font-semibold transition flex items-center space-x-2">
-                    <i data-lucide="send" style="width: 20px; height: 20px;"></i>
-                    <span>Ask</span>
+                <button onclick="attendanceMgr.showAddForm()"
+                    class="px-4 py-2 bg-electric-violet/20 text-electric-violet hover:bg-electric-violet/30 border border-electric-violet/50 rounded-lg flex items-center space-x-2 transition">
+                    <i data-lucide="plus"></i>
+                    <span>Add Subject</span>
                 </button>
             </div>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Overall Attendance</p>
+                        <p id="overall-percent" class="text-2xl font-bold text-white">-</p>
+                    </div>
+                    <div id="overall-icon" class="p-2 rounded-lg bg-gray-700/50">
+                        <i data-lucide="bar-chart-2" class="text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Classes</p>
+                        <p id="total-classes-tracked" class="text-2xl font-bold text-white">-</p>
+                    </div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Active Subjects</p>
+                        <p id="active-subjects-count" class="text-2xl font-bold text-white">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Subject Form (Hidden by default) -->
+            <div id="add-subject-form" class="hidden mb-8 p-6 bg-white/5 rounded-xl border border-white/10">
+                <h4 class="text-lg font-bold mb-4">Add New Subject</h4>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" id="new-subject-name" placeholder="Subject Name (e.g. Math)"
+                        class="px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white md:col-span-2">
+                    <input type="number" id="new-subject-attended" placeholder="Lectures Attended (e.g. 12)"
+                        class="px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white">
+                    <input type="number" id="new-subject-total" placeholder="Total Lectures Conducted (e.g. 15)"
+                        class="px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white">
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button onclick="attendanceMgr.hideAddForm()"
+                        class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+                    <button onclick="attendanceMgr.addSubject()"
+                        class="px-6 py-2 bg-electric-violet hover:bg-violet-600 rounded-lg font-semibold">Save
+                        Subject</button>
+                </div>
+            </div>
+
+            <!-- Subjects Grid -->
+            <div id="attendance-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Javascript will populate this -->
+            </div>
+
+            <div id="attendance-empty" class="text-center py-12 hidden">
+                <div class="inline-block p-4 rounded-full bg-white/5 mb-4">
+                    <i data-lucide="clipboard-list" class="text-gray-400 w-8 h-8"></i>
+                </div>
+                <p class="text-gray-400">No subjects tracked yet. Add one above!</p>
+            </div>
         </div>
+
+        <!-- AI Insights Lab -->
+        <div class="glass-card p-8 mt-8">
+            <h3 class="text-2xl font-bold flex items-center gap-2 mb-6">
+                AI Insights Lab
+                <i data-lucide="sparkles" class="text-yellow-400"></i>
+            </h3>
+
+            <!-- Tabs -->
+            <div class="flex space-x-1 bg-black/20 p-1 rounded-xl mb-6 w-fit">
+                <button onclick="switchInsightTab('summary')" id="tab-summary"
+                    class="px-6 py-2 rounded-lg text-sm font-semibold bg-electric-violet text-white transition">Summary</button>
+                <button onclick="switchInsightTab('quiz')" id="tab-quiz"
+                    class="px-6 py-2 rounded-lg text-sm font-semibold text-gray-400 hover:text-white transition">Quiz
+                    Me</button>
+                <button onclick="switchInsightTab('connect')" id="tab-connect"
+                    class="px-6 py-2 rounded-lg text-sm font-semibold text-gray-400 hover:text-white transition">Connections</button>
+                <button onclick="switchInsightTab('flowchart')" id="tab-flowchart"
+                    class="px-6 py-2 rounded-lg text-sm font-semibold text-gray-400 hover:text-white transition">Flowchart</button>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col md:flex-row gap-4 mb-8">
+                <div class="flex-1">
+                    <select id="insight-file-select"
+                        class="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:outline-none focus:border-electric-violet">
+                        <option value="" disabled selected>Select a document to analyze...</option>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <button onclick="generateInsight()"
+                    class="px-8 py-3 bg-gradient-to-r from-electric-violet to-violet-600 rounded-xl font-bold hover:shadow-lg hover:shadow-electric-violet/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="zap"></i>
+                    <span>Generate Insight</span>
+                </button>
+            </div>
+
+            <!-- Result Area -->
+            <div id="insight-loading" class="hidden text-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-electric-violet mx-auto mb-4">
+                </div>
+                <p class="text-gray-400 animate-pulse">Consulting the Second Brain...</p>
+            </div>
+
+            <div id="insight-result" class="hidden min-h-[200px]">
+                <!-- Dynamic Content Here -->
+            </div>
+        </div>
+        <p id="active-subjects-count" class="text-2xl font-bold text-white">-</p>
+    </div>
+    </div>
+    </div>
+
+    <!-- Add Subject Form (Hidden by default) -->
+    <div id="add-subject-form" class="hidden mb-8 p-6 bg-white/5 rounded-xl border border-white/10">
+        <h4 class="text-lg font-bold mb-4">Add New Subject</h4>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" id="new-subject-name" placeholder="Subject Name (e.g. Math)"
+                class="px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white md:col-span-2">
+            <input type="number" id="new-subject-attended" placeholder="Lectures Attended (e.g. 12)"
+                class="px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white">
+            <input type="number" id="new-subject-total" placeholder="Total Lectures Conducted (e.g. 15)"
+                class="px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white">
+        </div>
+        <div class="flex justify-end gap-3 mt-4">
+            <button onclick="attendanceMgr.hideAddForm()"
+                class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+            <button onclick="attendanceMgr.addSubject()"
+                class="px-6 py-2 bg-electric-violet hover:bg-violet-600 rounded-lg font-semibold">Save
+                Subject</button>
+        </div>
+    </div>
+
+    <!-- Subjects Grid -->
+    <div id="attendance-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Javascript will populate this -->
+    </div>
+    <div id="attendance-empty" class="hidden text-center py-8 text-gray-500">
+        <p>No subjects tracked yet. Add one to get started!</p>
+    </div>
+    </div>
+
+    <!-- File Upload Section -->
+    <div class="glass-card p-8 mt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold">Ingest Materials</h3>
+            <div class="flex space-x-3">
+                <button id="uploadImageBtn"
+                    class="px-4 py-2 bg-pink-500/20 text-pink-300 hover:bg-pink-500/30 border border-pink-500/50 rounded-lg flex items-center space-x-2 transition text-sm">
+                    <i data-lucide="image" style="width: 18px; height: 18px;"></i>
+                    <span>Upload Image</span>
+                </button>
+                <i data-lucide="folder-open" class="text-electric-violet" style="width: 24px; height: 24px;"></i>
+            </div>
+        </div>
+
+        <input type="file" id="imageInput" accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp" multiple class="hidden">
+
+        <!-- Drag & Drop Upload Area -->
+        <div id="dropZone"
+            class="border-2 border-dashed border-electric-violet/30 rounded-2xl p-12 text-center hover:border-electric-violet/60 hover:bg-electric-violet/5 transition cursor-pointer mb-6">
+            <div class="flex flex-col items-center space-y-4">
+                <div class="p-6 bg-electric-violet/20 rounded-full">
+                    <i data-lucide="upload-cloud" class="text-electric-violet" style="width: 48px; height: 48px;"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-2">Drop files here or click to browse</h4>
+                    <p class="text-gray-400">Support for PDFs, Audio, and Images (JPG, PNG, BMP)</p>
+                </div>
+                <input type="file" id="fileInput"
+                    accept=".pdf,.mp3,.wav,.m4a,.ogg,.flac,.aac,.jpg,.jpeg,.png,.bmp,.tiff,.webp" multiple
+                    class="hidden">
+            </div>
+        </div>
+
+        <!-- Upload Stats -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="glass-card p-4 text-center">
+                <i data-lucide="file-text" class="text-purple-400 mx-auto mb-2" style="width: 24px; height: 24px;"></i>
+                <p id="pdfCount" class="text-2xl font-bold gradient-text">0</p>
+                <p class="text-gray-400 text-sm">PDFs</p>
+            </div>
+            <div class="glass-card p-4 text-center">
+                <i data-lucide="music" class="text-blue-400 mx-auto mb-2" style="width: 24px; height: 24px;"></i>
+                <p id="audioCount" class="text-2xl font-bold gradient-text">0</p>
+                <p class="text-gray-400 text-sm">Audio</p>
+            </div>
+            <div class="glass-card p-4 text-center">
+                <i data-lucide="video" class="text-green-400 mx-auto mb-2" style="width: 24px; height: 24px;"></i>
+                <p id="videoCount" class="text-2xl font-bold gradient-text">0</p>
+                <p class="text-gray-400 text-sm">Videos</p>
+            </div>
+        </div>
+
+        <!-- Uploaded Files List -->
+        <div id="filesList" class="space-y-3">
+            <!-- Files will be added here dynamically -->
+        </div>
+
+        <div id="emptyState" class="text-center py-8 text-gray-500">
+            <i data-lucide="inbox" style="width: 48px; height: 48px;" class="mx-auto mb-3 opacity-50"></i>
+            <p>No files uploaded yet. Start by uploading your study materials!</p>
+        </div>
+    </div>
+
+    <!-- AI Query Section -->
+    <div class="glass-card p-8 mt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold">Ask Your Second Brain</h3>
+            <i data-lucide="message-circle" class="text-electric-violet" style="width: 24px; height: 24px;"></i>
+        </div>
+
+        <!-- Chat History -->
+        <div id="chatHistory" class="space-y-4 mb-6 max-h-96 overflow-y-auto">
+            <!-- Chat messages will appear here -->
+        </div>
+
+        <!-- Query Input -->
+        <div class="flex space-x-3">
+            <input type="text" id="queryInput" placeholder="Ask a question about your uploaded documents..."
+                class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-electric-violet text-white"
+                onkeypress="if(event.key==='Enter') askQuestion()" />
+            <button id="askBtn" onclick="askQuestion()"
+                class="px-6 py-3 bg-electric-violet hover:bg-violet-600 rounded-xl font-semibold transition flex items-center space-x-2">
+                <i data-lucide="send" style="width: 20px; height: 20px;"></i>
+                <span>Ask</span>
+            </button>
+        </div>
+    </div>
     </div>
 
     <!-- Initialize Lucide Icons -->
@@ -316,26 +483,247 @@
             window.location.href = 'nexusmind-login.html';
         });
 
-        // Attendance Tracker Function
-        function updateAttendance(attended, total) {
-            const missed = total - attended;
-            const percentage = Math.round((attended / total) * 100);
+        // Attendance Manager Class
+        class AttendanceManager {
+            constructor() {
+                this.STORAGE_KEY = 'nexusmind_attendance';
+                this.data = this.loadData();
+                this.render();
+            }
 
-            // Update numbers
-            document.getElementById('attendedCount').textContent = attended;
-            document.getElementById('missedCount').textContent = missed;
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('attendancePercent').textContent = percentage + '%';
+            loadData() {
+                const stored = localStorage.getItem(this.STORAGE_KEY);
+                return stored ? JSON.parse(stored) : [];
+            }
 
-            // Update circular progress
-            const circle = document.getElementById('attendanceCircle');
-            const circumference = 2 * Math.PI * 88; // 88 is the radius
-            const offset = circumference - (percentage / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
+            saveData() {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+                this.render();
+            }
+
+            addSubject() {
+                const name = document.getElementById('new-subject-name').value;
+                const attended = parseInt(document.getElementById('new-subject-attended').value) || 0;
+                const total = parseInt(document.getElementById('new-subject-total').value) || 0;
+
+                if (!name) {
+                    alert('Please enter a subject name');
+                    return;
+                }
+
+                this.data.push({
+                    id: crypto.randomUUID(),
+                    name,
+                    attended,
+                    total,
+                    target: 0.75 // Default 75%
+                });
+
+                this.saveData();
+                this.hideAddForm();
+                this.clearForm();
+            }
+
+            deleteSubject(id) {
+                if (confirm('Delete this subject?')) {
+                    this.data = this.data.filter(s => s.id !== id);
+                    this.saveData();
+                }
+            }
+
+            updateAttendance(id) {
+                const subject = this.data.find(s => s.id === id);
+                if (subject) {
+                    // Static Total Logic: Only increment attended
+                    if (subject.attended < subject.total) {
+                        subject.attended++;
+                        this.saveData();
+                    } else {
+                        alert("Attended lectures cannot exceed Total Lectures in Static Mode!");
+                    }
+                }
+            }
+
+            updateTarget(id) {
+                const subject = this.data.find(s => s.id === id);
+                if (subject) {
+                    const newTarget = prompt(`Set new target percentage for ${subject.name} (e.g. 80 for 80%)`, (subject.target * 100).toFixed(0));
+                    if (newTarget && !isNaN(newTarget)) {
+                        let t = parseFloat(newTarget);
+                        if (t > 1) t = t / 100; // Handle 80 vs 0.8
+                        if (t > 1) t = 1;
+                        if (t < 0) t = 0;
+                        subject.target = t;
+                        this.saveData();
+                    }
+                }
+            }
+
+            showAddForm() {
+                document.getElementById('add-subject-form').classList.remove('hidden');
+            }
+
+            hideAddForm() {
+                document.getElementById('add-subject-form').classList.add('hidden');
+            }
+
+            clearForm() {
+                document.getElementById('new-subject-name').value = '';
+                document.getElementById('new-subject-attended').value = '';
+                document.getElementById('new-subject-total').value = '';
+            }
+
+            getInsight(subject) {
+                const current = subject.total > 0 ? subject.attended / subject.total : 0;
+                const target = subject.target;
+
+                if (current >= target) {
+                    // How many can I miss? Or just maintenance message
+                    // User requirement: "must attend Z more lectures without a miss to reach [Target]%"
+                    // If already above, let's see how many to reach NEXT milestone (e.g. 100%?) or just maintain.
+
+                    // Let's implement the user's specific request for > 75% logic:
+                    // "Allow me to input a Target Percentage (e.g., 90%). Display... You must attend Z more lectures..."
+
+                    if (current >= target && target < 1) {
+                        return { msg: "You are on track! 🎉 Keep it up.", type: 'success' };
+                    }
+                    if (current >= 1) return { msg: "Perfect attendance! 🌟", type: 'success' };
+
+                    // Actually, if current < target (even if above 75%), we need calculation
+                }
+
+                // Calculate needed for Target
+                // needed = (target * (total + x) - (attended + x)) <= 0  <-- Solving for x where new avg >= target
+                // (attended + x) / (total + x) >= target
+                // attended + x >= target*total + target*x
+                // x - target*x >= target*total - attended
+                // x(1 - target) >= target*total - attended
+                // x >= (target*total - attended) / (1 - target)
+
+                if (current < target) {
+                    const required = Math.ceil(target * subject.total);
+                    const needed = required - subject.attended;
+
+                    if (needed <= 0) {
+                        return { msg: "Goal met! ✅", type: 'success' };
+                    }
+
+                    return {
+                        msg: `Attend <b>${needed}</b> more to reach ${(target * 100).toFixed(0)}%`,
+                        type: 'warning'
+                    };
+                } else {
+                    return { msg: "Goal exceeded! 🚀", type: 'success' };
+                }
+            }
+
+
+            render() {
+                const grid = document.getElementById('attendance-grid');
+                const empty = document.getElementById('attendance-empty');
+
+                if (this.data.length === 0) {
+                    grid.innerHTML = '';
+                    empty.classList.remove('hidden');
+                    this.updateSummary();
+                    return;
+                }
+
+                empty.classList.add('hidden');
+
+                grid.innerHTML = this.data.map(subject => {
+                    const percent = subject.total > 0 ? Math.round((subject.attended / subject.total) * 100) : 0;
+                    const insight = this.getInsight(subject);
+
+                    // Color Logic
+                    let color = 'red';
+                    if (percent >= 85) color = 'green';
+                    else if (percent >= 75) color = 'yellow';
+
+                    const strokeColor = color === 'green' ? '#4ade80' : color === 'yellow' ? '#facc15' : '#f87171';
+                    const circumference = 2 * Math.PI * 40;
+                    const offset = circumference - (percent / 100) * circumference;
+
+                    return `
+                    <div class="glass-card p-5 relative group">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="font-bold text-lg truncate pr-4">${subject.name}</h4>
+                            <button onclick="attendanceMgr.updateTarget('${subject.id}')" class="text-xs text-gray-400 hover:text-white bg-white/5 px-2 py-1 rounded">
+                                🎯 ${(subject.target * 100).toFixed(0)}%
+                            </button>
+                        </div>
+                        
+                        <div class="flex gap-4 items-center mb-4">
+                             <!-- Circular Progress -->
+                             <div class="relative w-24 h-24 flex-shrink-0">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none" />
+                                    <circle cx="48" cy="48" r="40" stroke="${strokeColor}" stroke-width="8" fill="none" 
+                                        stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" class="transition-all duration-500" />
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-xl font-bold" style="color: ${strokeColor}">${percent}%</span>
+                                </div>
+                             </div>
+                             
+                             <!-- Stats -->
+                             <div class="flex-1 space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Attended</span>
+                                    <span class="font-mono">${subject.attended}/${subject.total}</span>
+                                </div>
+                                <div class="text-xs ${insight.type === 'warning' ? 'text-orange-300' : 'text-green-300'} bg-white/5 p-2 rounded">
+                                    ${insight.msg}
+                                </div>
+                             </div>
+                        </div>
+                        
+                        <!-- Controls -->
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="attendanceMgr.updateAttendance('${subject.id}')" 
+                                class="w-full py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
+                                <i data-lucide="check" style="width: 16px;"></i> Mark Present
+                            </button>
+                        </div>
+                        
+                        <button onclick="attendanceMgr.deleteSubject('${subject.id}')" 
+                            class="absolute top-4 right-4 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                    `;
+                }).join('');
+
+                this.updateSummary();
+                lucide.createIcons();
+            }
+
+            updateSummary() {
+                const totalClasses = this.data.reduce((acc, curr) => acc + curr.total, 0);
+                const totalAttended = this.data.reduce((acc, curr) => acc + curr.attended, 0);
+                const overallPercent = totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0;
+
+                document.getElementById('overall-percent').textContent = overallPercent + '%';
+                document.getElementById('total-classes-tracked').textContent = totalClasses;
+                document.getElementById('active-subjects-count').textContent = this.data.length;
+
+                // Update color of icon
+                const iconDiv = document.getElementById('overall-icon');
+                if (overallPercent >= 75) {
+                    iconDiv.className = 'p-2 rounded-lg bg-green-500/20';
+                    iconDiv.innerHTML = '<i data-lucide="check-circle" class="text-green-400"></i>';
+                } else {
+                    iconDiv.className = 'p-2 rounded-lg bg-red-500/20';
+                    iconDiv.innerHTML = '<i data-lucide="alert-circle" class="text-red-400"></i>';
+                }
+                lucide.createIcons();
+            }
         }
 
-        // Initialize with sample data (you can change these values later)
-        updateAttendance(18, 24);
+
+
+        const attendanceMgr = new AttendanceManager();
 
         // BACKEND API CONFIGURATION
         const API_BASE_URL = 'http://localhost:5000/api';
@@ -437,8 +825,34 @@
                 `;
             }).join('');
 
+            updateInsightFileDropdown(); // Update dropdown whenever list renders
             lucide.createIcons();
         }
+
+        // --- NEW: Update Insight Dropdown ---
+        function updateInsightFileDropdown() {
+            const select = document.getElementById('insight-file-select');
+            if (!select) return;
+
+            // Save current selection if any
+            const currentVal = select.value;
+
+            // Clear (keep first option)
+            select.innerHTML = '<option value="" disabled selected>Select a document to analyze...</option>';
+
+            uploadedFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file.id;
+                option.textContent = file.name;
+                select.appendChild(option);
+            });
+
+            // Restore selection if still valid
+            if (currentVal && uploadedFiles.find(f => f.id === currentVal)) {
+                select.value = currentVal;
+            }
+        }
+
 
         // Upload file to backend
         async function uploadFileToBackend(file) {
@@ -532,7 +946,10 @@
                 if (uploadedFile) {
                     uploadedFiles.push(uploadedFile);
                     updateFileCounts();
+                    uploadedFiles.push(uploadedFile);
+                    updateFileCounts();
                     renderFilesList();
+                    updateInsightFileDropdown(); // Update dropdown on new file
 
                     // Show success message
                     alert(`✅ ${file.name} processed successfully!\n${uploadedFile.chunks} chunks created from ${uploadedFile.pages} pages.`);
@@ -611,6 +1028,19 @@
             }
         });
 
+        // Dedicated Image Upload Button
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const imageInput = document.getElementById('imageInput');
+
+        uploadImageBtn.addEventListener('click', () => imageInput.click());
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                addFiles(e.target.files);
+                e.target.value = '';
+            }
+        });
+
         // AI QUERY FUNCTIONALITY
         const chatHistory = document.getElementById('chatHistory');
         const queryInput = document.getElementById('queryInput');
@@ -624,8 +1054,10 @@
                 <div class="${isUser ? 'bg-electric-violet/20 border-electric-violet/30' : 'bg-white/5 border-white/10'} border rounded-2xl p-4 max-w-3xl">
                     <div class="flex items-start space-x-3">
                         <i data-lucide="${isUser ? 'user' : 'brain'}" class="${isUser ? 'text-electric-violet' : 'text-blue-400'}" style="width: 20px; height: 20px;"></i>
-                        <div class="flex-1">
-                            <p class="text-sm ${isUser ? 'text-white' : 'text-gray-200'}">${message}</p>
+                <div class="flex-1">
+                            <div class="text-sm ${isUser ? 'text-white' : 'text-gray-200'} prose prose-invert max-w-none">
+                                ${isUser ? message : marked.parse(message)}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -696,7 +1128,7 @@
                     <div class="flex items-start space-x-3">
                         <i data-lucide="brain" class="text-blue-400" style="width: 20px; height: 20px;"></i>
                         <div class="flex-1">
-                            <p class="text-sm text-gray-200 streaming-response"><span class="animate-pulse">●</span> Thinking...</p>
+                            <div class="text-sm text-gray-200 streaming-response prose prose-invert max-w-none"><span class="animate-pulse">●</span> Thinking...</div>
                         </div>
                     </div>
                 </div>
@@ -747,12 +1179,12 @@
 
                                 if (parsed.token) {
                                     fullResponse += parsed.token;
-                                    responseElement.textContent = fullResponse;
+                                    responseElement.innerHTML = marked.parse(fullResponse);
                                     chatHistory.scrollTop = chatHistory.scrollHeight;
                                 } else if (parsed.sources) {
                                     sources = parsed.sources;
                                 } else if (parsed.error) {
-                                    responseElement.textContent = '❌ ' + parsed.error;
+                                    responseElement.innerHTML = '❌ ' + parsed.error;
                                 }
                             } catch (e) {
                                 // Ignore parse errors for incomplete chunks
@@ -794,6 +1226,163 @@
         updateFileCounts();
         renderFilesList();
         loadFiles();
+
+        // --- AI INSIGHTS LOGIC ---
+        let currentInsightType = 'summary';
+
+        function switchInsightTab(type) {
+            currentInsightType = type;
+
+            // UI Updates
+            ['summary', 'quiz', 'connect', 'flowchart'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === type) {
+                    btn.classList.add('bg-electric-violet', 'text-white');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    btn.classList.remove('bg-electric-violet', 'text-white');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+
+            // Update Dropdown State
+            const select = document.getElementById('insight-file-select');
+            if (type === 'connect') {
+                select.disabled = true;
+                select.classList.add('opacity-50', 'cursor-not-allowed');
+                select.value = ""; // Clear selection
+            } else {
+                select.disabled = false;
+                select.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            // Clear result area
+            document.getElementById('insight-result').innerHTML = '';
+            document.getElementById('insight-result').classList.add('hidden');
+        }
+
+        async function generateInsight() {
+            const fileId = document.getElementById('insight-file-select').value;
+            const resultArea = document.getElementById('insight-result');
+            const loading = document.getElementById('insight-loading');
+
+            // Validation
+            if (currentInsightType !== 'connect' && !fileId) {
+                alert("Please select a file first!");
+                return;
+            }
+
+            // Show Loading
+            resultArea.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/generate-insights`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: currentInsightType,
+                        userId: document.getElementById('userId').textContent, // Use displayed ID or from variable
+                        fileId: fileId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || "Failed to generate insight");
+                }
+
+                // Render Result
+                loading.classList.add('hidden');
+                resultArea.classList.remove('hidden');
+
+                if (data.type === 'quiz') {
+                    renderQuiz(data.data);
+                } else if (data.type === 'flowchart') {
+                    resultArea.innerHTML = `
+                        <div class="glass-card p-6 bg-white/5 overflow-x-auto text-center">
+                            <h4 class="text-xl font-bold mb-4 gradient-text">Visual Concept Map</h4>
+                            <div class="mermaid">
+                                ${data.data}
+                            </div>
+                        </div>
+                    `;
+                    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+                } else {
+                    // Start markdown parsing
+                    resultArea.innerHTML = `
+                        <div class="prose prose-invert max-w-none prose-headings:text-electric-violet prose-a:text-blue-400">
+                            ${marked.parse(data.data)}
+                        </div>
+                    `;
+                }
+
+            } catch (e) {
+                loading.classList.add('hidden');
+                alert(`Error: ${e.message}`);
+            }
+        }
+
+        function renderQuiz(questions) {
+            const container = document.getElementById('insight-result');
+            container.innerHTML = `<div class="grid gap-6"></div>`;
+            const grid = container.firstElementChild;
+
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-6 border border-white/10';
+
+                // Options HTML
+                const optionsHtml = q.options.map((opt, i) => `
+                    <button onclick="checkAnswer(this, '${opt.replace(/'/g, "\\'")}', '${q.answer.replace(/'/g, "\\'")}')" 
+                        class="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition mb-2 flex items-center group">
+                        <span class="w-6 h-6 rounded-full border border-gray-500 flex items-center justify-center text-xs mr-3 group-hover:border-electric-violet">${String.fromCharCode(65 + i)}</span>
+                        ${opt}
+                    </button>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-electric-violet uppercase tracking-wider">Question ${idx + 1}</span>
+                        <h4 class="text-lg font-bold mt-1">${q.question}</h4>
+                    </div>
+                    <div>${optionsHtml}</div>
+                    <div class="mt-4 hidden feedback-msg text-sm font-semibold"></div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function checkAnswer(btn, selected, correct) {
+            // Disable all buttons in this card
+            const card = btn.closest('.glass-card');
+            const buttons = card.querySelectorAll('button');
+            const feedback = card.querySelector('.feedback-msg');
+
+            buttons.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                btn.classList.remove('bg-white/5');
+                btn.classList.add('bg-green-500/20', 'border-green-500');
+                feedback.textContent = "Correct! 🎉";
+                feedback.classList.add('text-green-400');
+            } else {
+                btn.classList.remove('bg-white/5');
+                btn.classList.add('bg-red-500/20', 'border-red-500');
+
+                // Highlight correct one
+                buttons.forEach(b => {
+                    if (b.textContent.includes(correct)) {
+                        b.classList.add('bg-green-500/20', 'border-green-500');
+                    }
+                });
+
+                feedback.textContent = `Incorrect. The answer is ${correct}.`;
+                feedback.classList.add('text-red-400');
+            }
+            feedback.classList.remove('hidden');
+        }
     </script>
 </body>
 
