@@ -701,41 +701,6 @@ Output Format:
 
 If no strong connections are found, summarize the diverse topics covered in the library."""
 
-        # 4. FLOWCHART MODE
-        elif insight_type == 'flowchart':
-            if not file_id:
-                return jsonify({'error': 'File ID required for flowchart'}), 400
-            
-            # Optimization: Reduce context to 8 key chunks to speed up generation
-            chunks = search_chunks_by_file(file_id, limit=8)
-            if not chunks:
-                  return jsonify({'error': 'File not found'}), 404
-            
-            context = "\n\n".join([c['text'] for c in chunks])
-            
-            prompt = f"""Create a simple Mermaid.js flowchart (`graph TD`) for this content.
-            
-Content:
-{context[:8000]}
-
-Rules:
-1. MAX 8-10 nodes. Keep it simple.
-2. Short node text (max 4 words).
-3. valid Mermaid syntax only.
-3. Edges should represent relationships (e.g., "causes", "includes", "leads to").
-4. Keep node text short (max 4-5 words) to ensure readability.
-5. Do NOT include markdown code blocks like ```mermaid. Just return the raw code.
-6. The graph must be valid Mermaid syntax.
-
-Example Output:
-graph TD
-    A[Start] --> B(Process)
-    B --> C{{Decision}}
-    C -->|Yes| D[Result 1]
-    C -->|No| E[Result 2]
-"""
-        else:
-            return jsonify({'error': 'Invalid insight type'}), 400
 
         # Generate Response
         print(f"🧠 Generating {insight_type} insight...")
@@ -756,18 +721,96 @@ graph TD
                 print(f"❌ JSON Parse Error: {response_text}")
                 return jsonify({'success': False, 'error': 'Failed to parse quiz JSON', 'raw': response_text})
         
-        # Clean Mermaid for flowchart
-        elif insight_type == 'flowchart':
-             cleaned_text = response_text.replace('```mermaid', '').replace('```', '').strip()
-             return jsonify({'success': True, 'type': 'flowchart', 'data': cleaned_text})
+
 
         return jsonify({'success': True, 'type': insight_type, 'data': response_text})
     except Exception as e:
         print(f"❌ Insight error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+# --- GAP AGENT INTEGRATION ---
+from utils.gap_agent import GapAgent
+gap_agent = GapAgent(client)
+
+@app.route('/api/analyze-gaps', methods=['POST'])
+def analyze_gaps():
+    """Analyze a document for missing concepts and auto-fill them"""
+    try:
+        data = request.get_json()
+        file_id = data.get('fileId')
+        user_id = data.get('userId')
+        
+        if not file_id or not user_id:
+            return jsonify({'error': 'File ID and User ID required'}), 400
+            
+        # 1. Get document context
+        chunks = search_chunks_by_file(file_id, limit=20)
+        if not chunks:
+            return jsonify({'error': 'File not found'}), 404
+            
+        context = "\n\n".join([c['text'] for c in chunks])
+        
+        # 2. Analyze for Gaps
+        print(f"🕵️‍♂️ Analyzing gaps for file {file_id}...")
+        analysis = gap_agent.analyze_gaps(context)
+        
+        if not analysis:
+            return jsonify({'success': False, 'error': 'Failed to analyze gaps'})
+            
+        print(f"📉 Gaps found: {analysis}")
+        
+        # 3. Auto-Search and Ingest
+        filled_gaps = []
+        
+        for gap in analysis.get('missing_concepts', [])[:3]: # Limit to top 3 gaps
+            concept = gap['concept']
+            print(f"🔍 Searching for gap: {concept}...")
+            
+            content = gap_agent.search_content(concept)
+            
+            # Prepare content for ingestion
+            new_text = ""
+            if content.get('wiki'):
+                new_text += f"Gap-Fill ({concept}) from Wikipedia:\n{content['wiki']['summary']}\nSource: {content['wiki']['url']}\n\n"
+            
+            if content.get('youtube'):
+                for video in content['youtube']:
+                     new_text += f"Related Video: {video['title']} ({video['link']})\n"
+            
+            if new_text:
+                # Add to Vector Store
+                embedding = generate_embedding(new_text)
+                if embedding is not None:
+                    vector_store['embeddings'].append(embedding)
+                    vector_store['texts'].append(new_text)
+                    vector_store['metadata'].append({
+                        'file_id': file_id, # Link to original file so it appears in searches
+                        'user_id': user_id,
+                        'file_name': f"Gap-Fill: {concept}",
+                        'type': 'gap-fill',
+                        'chunk_index': 999,
+                        'uploaded_at': datetime.now().isoformat()
+                    })
+                    print(f"✅ Auto-ingested content for {concept}")
+                    
+            filled_gaps.append({
+                'concept': concept,
+                'reason': gap['reason'],
+                'content': content
+            })
+            
+        return jsonify({
+            'success': True, 
+            'topic': analysis.get('detected_topic'),
+            'gaps': filled_gaps
+        })
+
+    except Exception as e:
+        print(f"❌ Gap Agent Error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+
     port = 5000
     print(f"\n🚀 Starting NexusMind RAG Backend on port {port}...")
     print(f"📊 Visit http://localhost:{port}/api/health to check status\n")
